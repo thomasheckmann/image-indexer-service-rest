@@ -5,6 +5,9 @@ import static spark.Spark.exception;
 import static spark.Spark.get;
 import static spark.Spark.post;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -16,7 +19,9 @@ public class ImageService {
 
 	public static void main(String[] args) {
 
-		get("/hello", (request, response) -> "Hello World!");
+		get("/hello", (request, response) -> "Hello World GET!");
+
+		post("/hello", (request, response) -> "Hello World POST!");
 
 		// calculate phash using image on local filesystem
 		get("/phash/:filename", (request, response) -> {
@@ -30,6 +35,7 @@ public class ImageService {
 		// calculate phash using image base64 encoded
 		// input object {filename: "just a name", data: "base64encoded image"}
 		post("/phash", (request, response) -> {
+			// Logger.getLogger("test").log(Level.INFO, "HELLO");
 			String s = request.body();
 			JsonObject jsonObject = (new JsonParser()).parse(s).getAsJsonObject();
 			JsonElement filename = jsonObject.get("filename");
@@ -49,13 +55,14 @@ public class ImageService {
 
 		exception(Exception.class, (e, request, response) -> {
 			response.status(404);
-			response.body("Resource not found");
+			Logger.getLogger("test").log(Level.INFO, e.getMessage());
+			response.body(e.getMessage() + " : Resource not found");
 		});
 
 		// set cors headers
 		before((request, response) -> {
 			response.header("Access-Control-Allow-Origin", "*");
-			// response.header("Access-Control-Allow-Methods", "GET, POST");
+			response.header("Access-Control-Allow-Methods", "GET, POST");
 			// response.header("Access-Control-Allow-Headers", "Content-Type");
 		});
 	}
